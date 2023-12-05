@@ -11,6 +11,11 @@ public class MicroserviceAgent {
     private Map<String, Integer> microservicePorts; // Mapa przechowująca nazwy mikroserwisów i ich numery portów
     private AtomicInteger portCounter; // Licznik portów do przydzielania
 
+    private Map<String, Thread> microserviceThreads;
+
+    private boolean allMicroservicesStopped;
+
+
     private MicroserviceAgent() {
         microservicePorts = new HashMap<>();
         portCounter = new AtomicInteger(3000); // Początkowy numer portu
@@ -81,10 +86,11 @@ public class MicroserviceAgent {
     }
 
     private void startMicroservices() {
+        microserviceThreads = new HashMap<>();
+
         microservicePorts.forEach((serviceName, port) -> {
             try {
-                // Uruchomienie serwisu w nowym wątku
-                new Thread(() -> {
+                Thread microserviceThread = new Thread(() -> {
                     try {
                         // Wywołaj metodę main danego mikroserwisu
                         String className = serviceName + "." + serviceName;
@@ -93,10 +99,31 @@ public class MicroserviceAgent {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                }).start();
+                });
+
+                microserviceThreads.put(serviceName, microserviceThread);
+                microserviceThread.start();
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
     }
+
+
+    public void stopMicroservices() {
+        microserviceThreads.forEach((serviceName, thread) -> {
+            try {
+                thread.interrupt(); // Przerwij wątek mikroserwisu
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        allMicroservicesStopped = true;
+    }
+
+
+    public synchronized boolean areAllMicroservicesStopped() {
+        return allMicroservicesStopped;
+    }
+
 }

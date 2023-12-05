@@ -83,14 +83,14 @@ class Client {
 
                     case "3":
                         // Wyświetlanie 10 ostatnich postów
-                            out.println("type:table");
-                            out.flush();
-                            odp = in.readLine();
-                            String[] result2 = odp.split("contents:");
-                            String[] zaw = result2[1].split(";");
-                            for (int i = 0; i < zaw.length; i++) {
-                                System.out.println(zaw[i]);
-                                if (i % 3 == 2) System.out.println();
+                        out.println("type:table");
+                        out.flush();
+                        odp = in.readLine();
+                        String[] result2 = odp.split("contents:");
+                        String[] zaw = result2[1].split(";");
+                        for (int i = 0; i < zaw.length; i++) {
+                            System.out.println(zaw[i]);
+                            if (i % 3 == 2) System.out.println();
                         }
                         break;
 
@@ -192,6 +192,13 @@ class Client {
                         login = null;
                         cz = false;
                         socket.close();
+                        MicroserviceAgent agent = MicroserviceAgent.getInstance();
+                        agent.stopMicroservices(); // Zamykanie mikroserwisów
+                        if (agent.areAllMicroservicesStopped()) {
+                            System.out.println("Wszystkie mikroserwisy zostały zamknięte pomyślnie.");
+                        } else {
+                            System.out.println("Nie udało się zamknąć wszystkich mikroserwisów.");
+                        }
                         System.out.println("Do widzenia");
                         System.exit(0);
                         break;
